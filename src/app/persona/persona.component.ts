@@ -22,6 +22,8 @@ export class PersonaComponent {
   nombre = '';
   fechaNacimiento = '';
 
+  indiceEditar = -1;
+
   constructor(private router: Router) {
     if (localStorage.getItem('sesionBasica') !== 'si') {
       this.router.navigate(['/login']);
@@ -39,6 +41,13 @@ export class PersonaComponent {
     this.router.navigate(['/login']);
   }
 
+  editar(indice: number) {
+    this.indiceEditar = indice;
+    this.dni = this.personas[indice].dni;
+    this.nombre = this.personas[indice].nombre;
+    this.fechaNacimiento = this.personas[indice].fechaNacimiento;
+  }
+
   guardar() {
     if (
       this.dni.trim() === '' ||
@@ -49,22 +58,30 @@ export class PersonaComponent {
       return;
     }
 
-    let nuevoId = 1;
+    if (this.indiceEditar === -1) {
+      let nuevoId = 1;
 
-    for (const persona of this.personas) {
-      if (persona.id >= nuevoId) {
-        nuevoId = persona.id + 1;
+      for (const persona of this.personas) {
+        if (persona.id >= nuevoId) {
+          nuevoId = persona.id + 1;
+        }
       }
+
+      const nuevaPersona: Persona = {
+        id: nuevoId,
+        dni: this.dni.trim(),
+        nombre: this.nombre.trim(),
+        fechaNacimiento: this.fechaNacimiento
+      };
+
+      this.personas.push(nuevaPersona);
+    } else {
+      this.personas[this.indiceEditar].dni = this.dni.trim();
+      this.personas[this.indiceEditar].nombre = this.nombre.trim();
+      this.personas[this.indiceEditar].fechaNacimiento =
+        this.fechaNacimiento;
     }
 
-    const nuevaPersona: Persona = {
-      id: nuevoId,
-      dni: this.dni.trim(),
-      nombre: this.nombre.trim(),
-      fechaNacimiento: this.fechaNacimiento
-    };
-
-    this.personas.push(nuevaPersona);
     this.guardarEnLocalStorage();
     this.limpiar();
   }
@@ -73,6 +90,7 @@ export class PersonaComponent {
     this.dni = '';
     this.nombre = '';
     this.fechaNacimiento = '';
+    this.indiceEditar = -1;
   }
 
   guardarEnLocalStorage() {
